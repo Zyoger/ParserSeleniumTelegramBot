@@ -1,7 +1,9 @@
 # pip freeze > requirements.txt
-from parser import get_prise
 import logging
+import time
 from telegram import __version__ as TG_VER
+from parser import get_prise
+from dbms import add_task_in_db, read_task
 
 try:
     from telegram import __version_info__
@@ -25,39 +27,47 @@ logger = logging.getLogger(__name__)
 URL = 'https://bask.ru/catalog/kurtka-bask-vorgol-v2-20212/'
 tag = "span"
 name = ""
+number = 5
 chat_id = 0
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    global dictionary_words
-    global dictionary
     global chat_id
     chat_id = update.effective_message.chat_id
     user = update.effective_user
-    await update.message.reply_html(
-        rf"Привет {user.mention_html()}!"
-    )
+    await update.message.reply_html(rf"Привет {user.mention_html()}!")
 
 
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text("/r - сброс бота для поиска нового слова.")
+    await update.message.reply_text("/status - узнать цену на текущие товары.")
+    await update.message.reply_text("/add task - добавить задачу.")
 
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
+    """"""
+    global URL, tag, name, number
+    await update.message.reply_text(f"Цена: {get_prise(URL, tag, name, number)}")
 
-    """
-    global URL, tag, name
-    await update.message.reply_text(f"Цена: {get_prise(URL, tag, name)}")
+
+async def add_task(update: Update):
+    await update.message.reply_text("Пример")
+    add_task_in_db()  # TEST
+    pass
+
+
+async def check_tasks(update: Update):
+    read_task()
+    pass
 
 
 def main() -> None:
     application = Application.builder().token("5889318762:AAGrWVxJJNllNZsbzdtdLf355mRf4hveOL4").build()
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", status))
+    application.add_handler(CommandHandler("add task", add_task))
     application.run_polling()
 
 
