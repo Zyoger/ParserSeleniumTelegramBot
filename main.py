@@ -42,7 +42,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("/status - узнать цену на текущие товары.")
-    await update.message.reply_text("/add task - добавить задачу.")
+    await update.message.reply_text("/addtask - добавить задачу.")
 
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -51,10 +51,13 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"Цена: {get_prise(URL, tag, name, number)}")
 
 
-async def add_task(update: Update):
+async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Пример")
-    add_task_in_db()  # TEST
-    pass
+    temp = context.args[0]
+    task = temp.split("@")
+    id_task = 123456788
+    add_task_in_db(id_task, task[0], task[1], task[2], task[3], task[4])
+    # /addtask bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@24
 
 
 async def check_tasks(update: Update):
@@ -67,7 +70,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", status))
-    application.add_handler(CommandHandler("add task", add_task))
+    application.add_handler(CommandHandler("addtask", add_task))
     application.run_polling()
 
 
