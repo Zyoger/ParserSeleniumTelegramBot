@@ -10,4 +10,5 @@ def get_prise(url, tag, name, number=0):
     soup = BeautifulSoup(page, 'html.parser')
     quotes = soup.find_all(tag, class_=name)
     browser.quit()
+    print(quotes[number].text)
     return quotes[number].text

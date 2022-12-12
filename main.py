@@ -3,7 +3,7 @@ import logging
 import time
 from telegram import __version__ as TG_VER
 from parser import get_prise
-from dbms import add_task_in_db, read_task
+from dbms import add_task_in_tab, read_task
 
 try:
     from telegram import __version_info__
@@ -24,17 +24,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-URL = 'https://bask.ru/catalog/kurtka-bask-vorgol-v2-20212/'
-tag = "span"
-name = ""
-number = 5
-chat_id = 0
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    global chat_id
-    chat_id = update.effective_message.chat_id
+    # chat_id = update.effective_message.chat_id
     user = update.effective_user
     await update.message.reply_html(rf"Привет {user.mention_html()}!")
 
@@ -42,35 +35,43 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("/status - узнать цену на текущие товары.")
-    await update.message.reply_text("/addtask - добавить задачу.")
+    await update.message.reply_text("/add - добавить задачу.")
+    await update.message.reply_text("/check - проверить задачи.")
 
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """"""
-    global URL, tag, name, number
-    await update.message.reply_text(f"Цена: {get_prise(URL, tag, name, number)}")
+    list_tasks = read_task()
+    await update.message.reply_text(f"Сейчас {len(list_tasks)} заданий:")
+    for i in range(len(list_tasks)):
+        await update.message.reply_text(f"{list_tasks[i][1]}")
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Пример")
     temp = context.args[0]
     task = temp.split("@")
-    id_task = 123456788
-    add_task_in_db(id_task, task[0], task[1], task[2], task[3], task[4])
+    add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
+    await update.message.reply_text("Задание добавлено!")
     # /addtask bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@24
 
 
-async def check_tasks(update: Update):
-    read_task()
-    pass
+async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    list_tasks = read_task()
+    for task in list_tasks:
+        print(task[1], task[2], task[3], task[4])
+        prise = get_prise("https://" + task[1], task[2], task[3], int(task[4]))
+        await update.message.reply_text(f"{task[1]}")
+        await update.message.reply_text(f"Цена: {prise}")
+    # url, type_tag, name_tag, number_position, verification_period
 
 
 def main() -> None:
-    application = Application.builder().token("5889318762:AAGrWVxJJNllNZsbzdtdLf355mRf4hveOL4").build()
+    application = Application.builder().token("5889318762:AAFOo747AOquQaqesrhUzyLtBuH-EdadJXI").build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", status))
-    application.add_handler(CommandHandler("addtask", add_task))
+    application.add_handler(CommandHandler("add", add_task))
+    application.add_handler(CommandHandler("check", check_tasks))
     application.run_polling()
 
 
