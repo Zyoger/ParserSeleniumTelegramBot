@@ -3,7 +3,7 @@ import logging
 import time
 from telegram import __version__ as TG_VER
 from parser import get_prise
-from dbms import add_task_in_tab, read_task
+from dbms import add_task_in_tab, read_task, create_tab
 
 try:
     from telegram import __version_info__
@@ -30,11 +30,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # chat_id = update.effective_message.chat_id
     user = update.effective_user
     await update.message.reply_html(rf"Привет {user.mention_html()}!")
+    await update.message.reply_text("/help - помощь.")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text("/status - узнать цену на текущие товары.")
+    await update.message.reply_text("/status - посмотреть текущие задачи.")
     await update.message.reply_text("/add - добавить задачу.")
     await update.message.reply_text("/check - проверить задачи.")
 
@@ -48,21 +49,33 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    temp = context.args[0]
-    task = temp.split("@")
-    add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
-    await update.message.reply_text("Задание добавлено!")
-    # /addtask bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@24
+    chat_id = update.effective_message.chat_id
+    try:
+        temp = context.args[0]
+        task = temp.split("@")
+        add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
+        due = float(task[4])*1
+        context.job_queue.run_once(alarm, due, chat_id=chat_id, name=str(chat_id), data=due)
+        await update.message.reply_text("Задание добавлено!")
+    except IndexError:
+        await update.message.reply_text("Ошибка!!! Задание не добавлено! Не верное количество аргументов!")
+        # /add https://bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@24
 
 
 async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     list_tasks = read_task()
     for task in list_tasks:
-        print(task[1], task[2], task[3], task[4])
-        prise = get_prise("https://" + task[1], task[2], task[3], int(task[4]))
-        await update.message.reply_text(f"{task[1]}")
-        await update.message.reply_text(f"Цена: {prise}")
+        # print(task[1], task[2], task[3], task[4])
+        prise = get_prise(task[1], task[2], task[3], int(task[4]))
+        await update.message.reply_text(f"{task[1]}\n ✅👉🏻 Текущая цена: {prise}👈🏻✅")
     # url, type_tag, name_tag, number_position, verification_period
+
+
+async def alarm(context: ContextTypes.DEFAULT_TYPE):
+    """Send the alarm message."""
+    list_tasks = read_task()
+    job = context.job
+    await context.bot.send_message(job.chat_id, text=f"Beep! {job.data} seconds are over!")
 
 
 def main() -> None:

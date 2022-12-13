@@ -33,7 +33,33 @@ def read_task():
     return result
 
 
+def dell_task(task_id):
+    conn = None
+    flag = 0
+    try:
+        conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM test_tasks_1 WHERE id = %s", (task_id,))
+        flag = cursor.rowcount
+        conn.commit()
+        cursor.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    if flag == 1:
+        return print(f"Удалено: {flag} задача.")
+    else:
+        print("Ошибка удаления!!! Задача не найдена!!! ")
+
+
+def checking_if_the_table_exists():
+    pass
+
+
 # create_tab()
 # p = read_task()
 # print(p)
 # print(len(p))
+# dell_task(1)

@@ -9,6 +9,7 @@ httpcore==0.16.2
 httpx==0.23.1
 idna==3.4
 outcome==1.2.0
+psycopg2==2.9.5
 pycparser==2.21
 PySocks==1.7.1
 python-telegram-bot==20.0a6
