@@ -2,15 +2,19 @@ import psycopg2
 
 
 def create_tab():
+    """"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE test_tasks_1 (id serial PRIMARY KEY, url varchar, type_tag varchar, name_tag varchar, number_position int, verification_period int);")
+    cursor.execute("CREATE TABLE test_tasks_1 "
+                   "(id serial PRIMARY KEY, url varchar, type_tag varchar, name_tag varchar, number_position int,"
+                   " verification_period int, last_prise int, min_prise int, max_prise int);")
     conn.commit()
     cursor.close()
     conn.close()
 
 
 def add_task_in_tab(url, type_teg, name_tag, number_position, verification_period):
+    """"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
     cursor.execute("""
@@ -24,6 +28,7 @@ def add_task_in_tab(url, type_teg, name_tag, number_position, verification_perio
 
 
 def read_task():
+    """"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM test_tasks_1;")
@@ -34,6 +39,7 @@ def read_task():
 
 
 def dell_task(task_id):
+    """"""
     conn = None
     flag = 0
     try:
@@ -51,11 +57,21 @@ def dell_task(task_id):
     if flag == 1:
         return print(f"Удалено: {flag} задача.")
     else:
-        print("Ошибка удаления!!! Задача не найдена!!! ")
+        print("Ошибка удаления!!! Задача не найдена!!!")
 
 
-def checking_if_the_table_exists():
-    pass
+def update_prise(last_prise, min_prise, max_prise):  # переписать, должен приниматься один аргумент (текущая цена), после обновлять нужное значение.
+    """"""
+    conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO test_tasks_1 (last_prise, min_prise, max_prise)
+        VALUES (%s, %s, %s)
+        """,
+                   (last_prise, min_prise, max_prise))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 # create_tab()

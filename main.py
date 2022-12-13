@@ -1,9 +1,8 @@
 # pip freeze > requirements.txt
 import logging
-import time
 from telegram import __version__ as TG_VER
 from parser import get_prise
-from dbms import add_task_in_tab, read_task, create_tab
+from dbms import add_task_in_tab, read_task, update_prise
 
 try:
     from telegram import __version_info__
@@ -27,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
-    # chat_id = update.effective_message.chat_id
     user = update.effective_user
     await update.message.reply_html(rf"Привет {user.mention_html()}!")
     await update.message.reply_text("/help - помощь.")
@@ -49,13 +47,15 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """"""
     chat_id = update.effective_message.chat_id
+    user_id = update.effective_user.id
     try:
         temp = context.args[0]
         task = temp.split("@")
         add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
-        due = float(task[4])*1
-        context.job_queue.run_once(alarm, due, chat_id=chat_id, name=str(chat_id), data=due)
+        due = float(task[4])*86400
+        context.job_queue.run_repeating(check_auto, due, 30, chat_id=chat_id, name=str(chat_id), user_id=None)
         await update.message.reply_text("Задание добавлено!")
     except IndexError:
         await update.message.reply_text("Ошибка!!! Задание не добавлено! Не верное количество аргументов!")
@@ -63,19 +63,25 @@ async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """"""
     list_tasks = read_task()
+    # update_prise()
     for task in list_tasks:
-        # print(task[1], task[2], task[3], task[4])
         prise = get_prise(task[1], task[2], task[3], int(task[4]))
         await update.message.reply_text(f"{task[1]}\n ✅👉🏻 Текущая цена: {prise}👈🏻✅")
     # url, type_tag, name_tag, number_position, verification_period
 
 
-async def alarm(context: ContextTypes.DEFAULT_TYPE):
+async def check_auto(context: ContextTypes.DEFAULT_TYPE):
     """Send the alarm message."""
+    # update_prise()
     list_tasks = read_task()
-    job = context.job
-    await context.bot.send_message(job.chat_id, text=f"Beep! {job.data} seconds are over!")
+    for task in list_tasks:
+        current_prise = get_prise(task[1], task[2], task[3], int(task[4]))
+        last_prise = read_task()
+        if current_prise < last_prise[6]:
+            job = context.job
+            await context.bot.send_message(job.chat_id, text=f"---написать о снижении цены---")
 
 
 def main() -> None:
