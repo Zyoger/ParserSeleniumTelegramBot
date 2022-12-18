@@ -1,7 +1,7 @@
 # pip freeze > requirements.txt
 import logging
 from telegram import __version__ as TG_VER
-from parser import get_prise
+from parser import get_prise, get_prise_in_int
 from dbms import add_task_in_tab, read_task, update_prise
 
 try:
@@ -18,9 +18,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -54,12 +52,12 @@ async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         temp = context.args[0]
         task = temp.split("@")
         add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
-        due = float(task[4])*86400
-        context.job_queue.run_repeating(check_auto, due, 30, chat_id=chat_id, name=str(chat_id), user_id=None)
+        due = float(task[4])  #*86400
+        context.job_queue.run_repeating(check_auto, due, 5, chat_id=chat_id, name=str(chat_id), user_id=None)
         await update.message.reply_text("Задание добавлено!")
     except IndexError:
         await update.message.reply_text("Ошибка!!! Задание не добавлено! Не верное количество аргументов!")
-        # /add https://bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@24
+        # /add https://bask.ru/catalog/kurtka-bask-vorgol-v2-20212/@span@@5@30
 
 
 async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,20 +66,22 @@ async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # update_prise()
     for task in list_tasks:
         prise = get_prise(task[1], task[2], task[3], int(task[4]))
-        await update.message.reply_text(f"{task[1]}\n ✅👉🏻 Текущая цена: {prise}👈🏻✅")
-    # url, type_tag, name_tag, number_position, verification_period
+        await update.message.reply_text(f"ID:{task[0]}\n{task[1]}\n ✅👉🏻 Текущая цена: {prise}👈🏻✅")
 
 
 async def check_auto(context: ContextTypes.DEFAULT_TYPE):
     """Send the alarm message."""
-    # update_prise()
     list_tasks = read_task()
     for task in list_tasks:
-        current_prise = get_prise(task[1], task[2], task[3], int(task[4]))
-        last_prise = read_task()
-        if current_prise < last_prise[6]:
+        current_prise = get_prise_in_int(get_prise(task[1], task[2], task[3], int(task[4])))
+        if task[6] is None:
+            print(current_prise)
+            update_prise(task[0], current_prise)
+            break
+        if current_prise < task[6]:
             job = context.job
             await context.bot.send_message(job.chat_id, text=f"---написать о снижении цены---")
+            update_prise(task[0], current_prise)
 
 
 def main() -> None:
