@@ -89,5 +89,5 @@ def update_prise(task_id, last_prise):
 # print(len(p))
 # dell_task(16)
 
-# for i in range(11, 16):
-#     dell_task(i)
+# for i in range(17, 20):
+#    dell_task(i)
