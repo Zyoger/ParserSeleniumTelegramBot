@@ -2,7 +2,7 @@
 import logging
 from telegram import __version__ as TG_VER
 from parser import get_prise, get_prise_in_int
-from dbms import add_task_in_tab, read_task, update_prise
+from dbms import add_task_in_tab, read_task, update_prise, dell_task
 
 try:
     from telegram import __version_info__
@@ -34,6 +34,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("/status - посмотреть текущие задачи.")
     await update.message.reply_text("/add - добавить задачу.")
     await update.message.reply_text("/check - проверить задачи.")
+    await update.message.reply_text("/dell - удалить задачу.")
 
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -84,6 +85,13 @@ async def check_auto(context: ContextTypes.DEFAULT_TYPE):
             update_prise(task[0], current_prise)
 
 
+async def dell(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """"""
+    id_task = int(context.args[0])
+    dell_task(id_task)
+    await update.message.reply_text(f"Задание удалено!!!")
+
+
 def main() -> None:
     application = Application.builder().token("5889318762:AAFOo747AOquQaqesrhUzyLtBuH-EdadJXI").build()
     application.add_handler(CommandHandler("start", start))
@@ -91,6 +99,7 @@ def main() -> None:
     application.add_handler(CommandHandler("status", status))
     application.add_handler(CommandHandler("add", add_task))
     application.add_handler(CommandHandler("check", check_tasks))
+    application.add_handler(CommandHandler("dell", dell))
     application.run_polling()
 
 

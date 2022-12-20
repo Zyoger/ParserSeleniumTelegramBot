@@ -84,8 +84,8 @@ def update_prise(task_id, last_prise):
 
 
 # create_tab()
-# p = read_task()
-# print(p)
+p = read_task()
+print(p)
 # print(len(p))
 # dell_task(16)
 
