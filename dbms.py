@@ -2,7 +2,7 @@ import psycopg2
 
 
 def create_tab():
-    """"""
+    """Create table in db"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
     cursor.execute("CREATE TABLE test_tasks_2 "
@@ -14,7 +14,7 @@ def create_tab():
 
 
 def add_task_in_tab(url, type_teg, name_tag, number_position, verification_period):
-    """"""
+    """Add task in table"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
     cursor.execute("""
@@ -29,7 +29,7 @@ def add_task_in_tab(url, type_teg, name_tag, number_position, verification_perio
 
 
 def read_task():
-    """"""
+    """Read all tasks in table"""
     conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM test_tasks_2;")
@@ -40,7 +40,7 @@ def read_task():
 
 
 def dell_task(task_id):
-    """"""
+    """Dell task from db"""
     conn = None
     flag = 0
     try:

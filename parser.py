@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 
 def get_prise(url, tag, name, number=0):
-    """"""
+    """Return prise"""
     browser = webdriver.Chrome()
     browser.get(url)
     browser.implicitly_wait(3)
@@ -15,7 +15,7 @@ def get_prise(url, tag, name, number=0):
 
 
 def get_prise_in_int(string):
-    """"""
+    """Convert str in int"""
     result = ""
     for char in string:
         if char.isdigit():

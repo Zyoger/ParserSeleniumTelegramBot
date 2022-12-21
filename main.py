@@ -31,14 +31,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text("/status - посмотреть текущие задачи.")
+    await update.message.reply_text("/status - посмотреть список текущих задач.")
     await update.message.reply_text("/add - добавить задачу.")
     await update.message.reply_text("/check - проверить задачи.")
     await update.message.reply_text("/dell - удалить задачу.")
 
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """"""
+    """Shows current tasks."""
     list_tasks = read_task()
     await update.message.reply_text(f"Сейчас {len(list_tasks)} заданий:")
     for i in range(len(list_tasks)):
@@ -46,7 +46,7 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """"""
+    """Adds a task."""
     chat_id = update.effective_message.chat_id
     user_id = update.effective_user.id
     try:
@@ -62,7 +62,7 @@ async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """"""
+    """Checks the current price of all tasks."""
     list_tasks = read_task()
     # update_prise()
     for task in list_tasks:
@@ -71,7 +71,8 @@ async def check_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def check_auto(context: ContextTypes.DEFAULT_TYPE):
-    """Send the alarm message."""
+    """Automatic price check for all tasks according to the specified interval.
+     If the price is lower, then informs the user about it."""
     list_tasks = read_task()
     for task in list_tasks:
         current_prise = get_prise_in_int(get_prise(task[1], task[2], task[3], int(task[4])))
@@ -86,7 +87,7 @@ async def check_auto(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def dell(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """"""
+    """Dell task"""
     id_task = int(context.args[0])
     dell_task(id_task)
     await update.message.reply_text(f"Задание удалено!!!")
