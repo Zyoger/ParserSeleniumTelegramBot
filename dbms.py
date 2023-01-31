@@ -1,11 +1,16 @@
 import psycopg2
+current_dbname = 'postgresdb'
+current_user = 'zyoger'
+current_host = 'localhost'
+current_port = '54321'
+current_password = 'p5n32esli77'
 
 
 def create_tab():
     """Create table in db"""
-    conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+    conn = psycopg2.connect(dbname=current_dbname, user=current_user, host=current_host, port=current_port, password=current_password)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE test_tasks_2 "
+    cursor.execute("CREATE TABLE test_tasks_01"
                    "(id serial PRIMARY KEY, url varchar, type_tag varchar, name_tag varchar, number_position int,"
                    " verification_period int, last_prise int, min_prise int, max_prise int);")
     conn.commit()
@@ -15,7 +20,7 @@ def create_tab():
 
 def add_task_in_tab(url, type_teg, name_tag, number_position, verification_period):
     """Add task in table"""
-    conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+    conn = psycopg2.connect(dbname=current_dbname, user=current_user, host=current_host, port=current_port, password=current_password)
     cursor = conn.cursor()
     cursor.execute("""
     INSERT INTO test_tasks_2 (url, type_tag, name_tag, number_position, verification_period)
@@ -30,9 +35,9 @@ def add_task_in_tab(url, type_teg, name_tag, number_position, verification_perio
 
 def read_task():
     """Read all tasks in table"""
-    conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+    conn = psycopg2.connect(dbname=current_dbname, user=current_user, host=current_host, port=current_port, password=current_password)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM test_tasks_2;")
+    cursor.execute("""SELECT * FROM test_tasks_2;""")
     result = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -44,7 +49,7 @@ def dell_task(task_id):
     conn = None
     flag = 0
     try:
-        conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+        conn = psycopg2.connect(dbname=current_dbname, user=current_user, host=current_host, port=current_port, password=current_password)
         cursor = conn.cursor()
         cursor.execute("""DELETE FROM test_tasks_2 WHERE id = %s""", (task_id,))
         flag = cursor.rowcount
@@ -63,13 +68,11 @@ def dell_task(task_id):
 
 def update_prise(task_id, last_prise):
     """ update vendor name based on the vendor id """
-    sql = """ UPDATE test_tasks_2
-                SET last_prise = %s
-                WHERE id = %s"""
+    sql = """ UPDATE test_tasks_2 SET last_prise = %s WHERE id = %s"""
     conn = None
     updated_rows = 0
     try:
-        conn = psycopg2.connect(dbname='postgresdb', user='egor', host='localhost', password='P5n32esli77')
+        conn = psycopg2.connect(dbname=current_dbname, user=current_user, host=current_host, port=current_port, password=current_password)
         cur = conn.cursor()
         cur.execute(sql, (last_prise, task_id))
         updated_rows = cur.rowcount
@@ -84,8 +87,8 @@ def update_prise(task_id, last_prise):
 
 
 # create_tab()
-p = read_task()
-print(p)
+# p = read_task()
+# print(p)
 # print(len(p))
 # dell_task(16)
 

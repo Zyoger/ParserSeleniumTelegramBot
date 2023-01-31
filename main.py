@@ -54,7 +54,7 @@ async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         task = temp.split("@")
         add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
         due = float(task[4])  #*86400
-        context.job_queue.run_repeating(check_auto, due, 5, chat_id=chat_id, name=str(chat_id), user_id=None)
+        jobss = context.job_queue.run_repeating(check_auto, due, 5, chat_id=chat_id, name=str(chat_id), user_id=None)
         await update.message.reply_text("Задание добавлено!")
     except IndexError:
         await update.message.reply_text("Ошибка!!! Задание не добавлено! Не верное количество аргументов!")
@@ -90,6 +90,7 @@ async def dell(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Dell task"""
     id_task = int(context.args[0])
     dell_task(id_task)
+    # jobss.schedule_removal()
     await update.message.reply_text(f"Задание удалено!!!")
 
 
