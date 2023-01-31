@@ -61,9 +61,9 @@ def dell_task(task_id):
         if conn is not None:
             conn.close()
     if flag == 1:
-        return print(f"Удалено: {flag} задача.")
+        return True
     else:
-        print("Ошибка удаления!!! Задача не найдена!!!")
+        return False
 
 
 def update_prise(task_id, last_prise):

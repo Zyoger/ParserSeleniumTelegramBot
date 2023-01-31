@@ -88,10 +88,12 @@ async def check_auto(context: ContextTypes.DEFAULT_TYPE):
 
 async def dell(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Dell task"""
-    id_task = int(context.args[0])
-    dell_task(id_task)
     # jobss.schedule_removal()
-    await update.message.reply_text(f"Задание удалено!!!")
+    id_task = int(context.args[0])
+    if dell_task(id_task):
+        await update.message.reply_text(f"Задание удалено!!!")
+    else:
+        await update.message.reply_text(f"Задание не найдено!!!")
 
 
 def main() -> None:
