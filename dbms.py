@@ -1,9 +1,9 @@
 import psycopg2
-current_dbname = 'postgresdb'
+current_dbname = 'mydb'
 current_user = 'zyoger'
 current_host = 'localhost'
 current_port = '54321'
-current_password = 'p5n32esli77'
+current_password = 'P5n32esli77'
 
 
 def create_tab():
@@ -86,7 +86,7 @@ def update_prise(task_id, last_prise):
     return updated_rows
 
 
-# create_tab()
+create_tab()
 # p = read_task()
 # print(p)
 # print(len(p))
