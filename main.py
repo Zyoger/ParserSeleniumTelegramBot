@@ -1,7 +1,7 @@
 # pip freeze > requirements.txt
 import logging
 from telegram import __version__ as TG_VER
-from parser import get_prise, get_prise_in_int
+from parser_selenium import get_prise, get_prise_in_int
 from dbms import add_task_in_tab, read_task, update_prise, dell_task
 
 try:
@@ -39,6 +39,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Shows current tasks."""
+
     list_tasks = read_task()
     await update.message.reply_text(f"Сейчас {len(list_tasks)} заданий:")
     for i in range(len(list_tasks)):
@@ -48,12 +49,13 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Adds a task."""
     chat_id = update.effective_message.chat_id
-    # user_id = update.effective_user.id
     try:
         task = context.args[0].split("@")
         add_task_in_tab(task[0], task[1], task[2], task[3], task[4])
+
         due = float(task[4])  #*86400
-        jobss = context.job_queue.run_repeating(check_auto, due, 5, chat_id=chat_id, name=str(chat_id), user_id=None)
+
+        context.job_queue.run_repeating(check_auto, due, 5, chat_id=chat_id, name=str(chat_id), user_id=None)
         await update.message.reply_text("Задание добавлено!")
     except IndexError:
         await update.message.reply_text("Ошибка!!! Задание не добавлено! Не верное количество аргументов!")
@@ -75,13 +77,22 @@ async def check_auto(context: ContextTypes.DEFAULT_TYPE):
     for task in list_tasks:
         current_prise = get_prise_in_int(get_prise(task[1], task[2], task[3], int(task[4])))
         if task[6] is None:
-            print(current_prise)
             update_prise(task[0], current_prise)
             break
         if current_prise < task[6]:
             job = context.job
-            await context.bot.send_message(job.chat_id, text=f"---написать о снижении цены---")
+            await context.bot.send_message(job.chat_id, text=f"---Цена снизилась---")
             update_prise(task[0], current_prise)
+            break
+        if current_prise > task[6]:
+            job = context.job
+            await context.bot.send_message(job.chat_id, text=f"---Цена выросла---")
+            update_prise(task[0], current_prise)
+            break
+        if current_prise == task[6]:
+            job = context.job
+            await context.bot.send_message(job.chat_id, text=f"---Цена не изменилась---")
+            break
 
 
 async def dell(update: Update, context: ContextTypes.DEFAULT_TYPE):
